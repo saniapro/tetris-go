@@ -21,7 +21,7 @@ func InitTerminal() {
 	if err := screen.Init(); err != nil {
 		log.Fatalf("Cannot init screen: %v", err)
 	}
-
+	screen.HideCursor()
 	screen.Clear()
 }
 

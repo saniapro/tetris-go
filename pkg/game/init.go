@@ -4,16 +4,14 @@ import "github.com/saniapro/tetris/pkg/tetris"
 
 func Init() *GameState {
 	gs := &GameState{
-		Board: make([][]int, 20),
-		Level: 1,
+		Board:      tetris.NewBoard(),
+		R:          &ScreenRenderer{},
+		Level:      Level{Number: 1, ManualNumber: false},
+		TetrisStat: &tetris.TetrisStat{},
 	}
 
-	for i := range gs.Board {
-		gs.Board[i] = make([]int, 10)
-	}
-
-	gs.Current = tetris.SpawnPiece()
-	gs.Next = tetris.SpawnPiece()
+	gs.Current = tetris.SpawnPiece(gs.TetrisStat)
+	gs.Next = tetris.SpawnPiece(gs.TetrisStat)
 
 	return gs
 }
