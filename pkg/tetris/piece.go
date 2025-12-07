@@ -1,25 +1,27 @@
 package tetris
 
 import (
-	"math/rand"
-
 	"github.com/gdamore/tcell/v2"
 )
 
+// Piece represents a tetromino with its matrix, position, and color.
 type Piece struct {
-	Matrix [][]int
-	X, Y   int
-	Color  tcell.Color
+	Matrix [][]int     // 2D grid defining the piece shape (Fill=1, empty=0)
+	X, Y   int         // Position on the board
+	Color  tcell.Color // Rendering color
 }
 
-const Fill = 1
+const Fill = 1 // Marker value for filled cells in piece matrices
 
-func SpawnPiece(ts *TetrisStat) Piece {
-	n := rand.Intn(len(Pieces))
+// SpawnPiece creates a new tetromino from the pre-defined pieces array.
+// Updates TetrisStat tracking and uses the bag generator index.
+func SpawnPiece(ts *TetrisStat, n int) Piece {
 	ts.AddTotal(n)
 	return Pieces[n]
 }
 
+// RotatePiece rotates the given piece 90 degrees clockwise.
+// Preserves the piece's position and color across rotations.
 func RotatePiece(p Piece) Piece {
 	n := len(p.Matrix)
 	m := len(p.Matrix[0])

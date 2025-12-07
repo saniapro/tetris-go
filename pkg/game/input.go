@@ -4,6 +4,8 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+// HandleInput processes keyboard events and translates them to game actions.
+// Arrow keys move/rotate pieces, spacebar triggers hard drop, +/- adjust level, 'p' pauses, 'q' and Esc quit.
 func HandleInput(gs *GameState, ev tcell.Event) {
 	switch e := ev.(type) {
 	case *tcell.EventKey:

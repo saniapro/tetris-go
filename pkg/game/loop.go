@@ -6,6 +6,9 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+// Loop runs the main game loop until game over.
+// Handles timed piece drops, processes input events, and updates the display.
+// Uses a ticker for consistent drop speed and a goroutine for non-blocking event polling.
 func Loop(gs *GameState) {
 	gs.Ticker = time.NewTicker(time.Millisecond * 500) // швидкість падіння
 	defer gs.Ticker.Stop()
@@ -64,11 +67,7 @@ func Loop(gs *GameState) {
 	close(quit)
 
 	if gs.GameOver {
-		gs.ClearScreen()
 		if gs.R != nil {
-			gs.R.PutStr(2, 10, "Game Over! Press any key")
-			gs.R.Show()
-			// wait for a key press using renderer if available
 			gs.R.PollEvent()
 		} else {
 			time.Sleep(time.Second)

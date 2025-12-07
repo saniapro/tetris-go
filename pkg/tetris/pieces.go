@@ -2,7 +2,8 @@ package tetris
 
 import "github.com/gdamore/tcell/v2"
 
-// Generate array of tetris pieces with their rotations
+// Pieces defines the seven standard Tetris tetrominoes (I, O, T, S, Z, J, L).
+// Each piece is defined with its initial matrix orientation, spawn position, and color.
 var Pieces = []Piece{
 	// I Piece
 	{

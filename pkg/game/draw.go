@@ -8,6 +8,9 @@ import (
 
 const strFill = "██"
 
+// DrawBoard renders the entire game state to the terminal.
+// Draws the playing field, borders, current piece, next piece, and game statistics (score, level, lines).
+// Called once per game tick to update the display.
 func (gs *GameState) DrawBoard() {
 	gs.ClearScreen()
 	// Implementation to draw the game state on the screen
@@ -64,7 +67,7 @@ func (gs *GameState) DrawBoard() {
 
 	if gs.GameOver {
 		if gs.R != nil {
-			gs.R.PutStr(3, 10, "GAME OVER")
+			gs.R.PutStr(tetris.BoardXOffset+6, tetris.BoardYOffset+10, "GAME OVER")
 		}
 	}
 	if gs.R != nil {
@@ -72,7 +75,9 @@ func (gs *GameState) DrawBoard() {
 	}
 }
 
-// DrawPiece draws a piece at its current position
+// DrawPiece renders a tetromino piece at the given screen position with its assigned color.
+// xOffset and yOffset specify the top-left corner where the piece matrix begins.
+// Each filled cell in the piece is rendered using the piece's color.
 func (gs *GameState) DrawPiece(p tetris.Piece, xOffset, yOffset int) {
 	for i, row := range p.Matrix {
 		for j, cell := range row {
