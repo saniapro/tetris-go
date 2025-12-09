@@ -57,11 +57,9 @@ func (gs *GameState) DrawBoard() {
 		// Lines counter
 		gs.R.PutStr(xOffset, tetris.BoardYOffset+5, "Lines:")
 		gs.R.PutStr(xOffset+6, tetris.BoardYOffset+6, strconv.Itoa(gs.Lines))
-		gs.R.PutStr(xOffset, tetris.BoardYOffset+7, "Current:")
-		gs.R.PutStr(xOffset, tetris.BoardYOffset+8, strconv.Itoa(gs.Current.X)+","+strconv.Itoa(gs.Current.Y))
-		gs.R.PutStr(xOffset, tetris.BoardYOffset+10, "Next:")
-		gs.DrawPiece(gs.Next, xOffset, tetris.BoardYOffset+11)
-		gs.R.PutStr(xOffset, tetris.BoardYOffset+17, "Tetris: "+gs.TetrisStat.GetPercent())
+
+		gs.DrawPiece(gs.Next, xOffset, tetris.BoardYOffset+7)
+		gs.R.PutStr(xOffset, tetris.BoardYOffset+11, "Tetris Rate: "+gs.TetrisRate.GetPercent())
 	}
 	gs.SelectCount = 0
 

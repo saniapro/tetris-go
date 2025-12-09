@@ -1,6 +1,6 @@
 package tetris
 
-import "math/rand"
+import rand "math/rand/v2"
 
 // BagGenerator implements the 7-bag random tetromino selection algorithm.
 // Ensures each of the 7 tetrominoes appears exactly once per bag before reshuffling.
@@ -14,8 +14,11 @@ type BagGenerator struct {
 // NewBagGenerator creates a new 7-bag generator with the given seed.
 // Immediately generates and shuffles the first bag.
 func NewBagGenerator(seed int64) *BagGenerator {
+	// Use PCG source from math/rand/v2 for a good seeded generator.
+	s := uint64(seed)
+	src := rand.NewPCG(s, s^0x9e3779b97f4a7c15)
 	g := &BagGenerator{
-		rng: rand.New(rand.NewSource(seed)),
+		rng: rand.New(src),
 	}
 	g.refill()
 	return g

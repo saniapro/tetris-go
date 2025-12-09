@@ -8,14 +8,13 @@ var Pieces = []Piece{
 	// I Piece
 	{
 		Matrix: [][]int{
-			{0, Fill, 0, 0},
-			{0, Fill, 0, 0},
-			{0, Fill, 0, 0},
-			{0, Fill, 0, 0},
+			{Fill, Fill, Fill, Fill},
 		},
-		X:     3,
-		Y:     0,
-		Color: tcell.Color(tcell.ColorWhite),
+		X:        3,
+		Y:        0,
+		Color:    tcell.Color(tcell.ColorAqua),
+		ID:       0,
+		Rotation: 0,
 	},
 	// O Piece
 	{
@@ -23,9 +22,11 @@ var Pieces = []Piece{
 			{Fill, Fill},
 			{Fill, Fill},
 		},
-		X:     4,
-		Y:     0,
-		Color: tcell.Color(tcell.ColorBlue),
+		X:        4,
+		Y:        0,
+		Color:    tcell.Color(tcell.ColorYellow),
+		ID:       1,
+		Rotation: 0,
 	},
 	// T Piece
 	{
@@ -33,9 +34,11 @@ var Pieces = []Piece{
 			{0, Fill, 0},
 			{Fill, Fill, Fill},
 		},
-		X:     3,
-		Y:     0,
-		Color: tcell.Color(tcell.ColorRed),
+		X:        3,
+		Y:        0,
+		Color:    tcell.Color(tcell.ColorPurple),
+		ID:       2,
+		Rotation: 0,
 	},
 	// S Piece
 	{
@@ -43,9 +46,11 @@ var Pieces = []Piece{
 			{0, Fill, Fill},
 			{Fill, Fill, 0},
 		},
-		X:     3,
-		Y:     0,
-		Color: tcell.Color(tcell.ColorTeal),
+		X:        3,
+		Y:        0,
+		Color:    tcell.Color(tcell.ColorLime),
+		ID:       3,
+		Rotation: 0,
 	},
 	// Z Piece
 	{
@@ -53,9 +58,11 @@ var Pieces = []Piece{
 			{Fill, Fill, 0},
 			{0, Fill, Fill},
 		},
-		X:     3,
-		Y:     0,
-		Color: tcell.Color(tcell.ColorTeal),
+		X:        3,
+		Y:        0,
+		Color:    tcell.Color(tcell.ColorRed),
+		ID:       4,
+		Rotation: 0,
 	},
 	// J Piece
 	{
@@ -63,9 +70,11 @@ var Pieces = []Piece{
 			{Fill, 0, 0},
 			{Fill, Fill, Fill},
 		},
-		X:     3,
-		Y:     0,
-		Color: tcell.Color(tcell.ColorGreen),
+		X:        3,
+		Y:        0,
+		Color:    tcell.Color(tcell.ColorBlue),
+		ID:       5,
+		Rotation: 0,
 	},
 	// L Piece
 	{
@@ -73,8 +82,10 @@ var Pieces = []Piece{
 			{0, 0, Fill},
 			{Fill, Fill, Fill},
 		},
-		X:     3,
-		Y:     0,
-		Color: tcell.Color(tcell.ColorGreen),
+		X:        3,
+		Y:        0,
+		Color:    tcell.Color(tcell.ColorOrange),
+		ID:       6,
+		Rotation: 0,
 	},
 }

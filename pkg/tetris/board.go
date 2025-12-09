@@ -1,6 +1,10 @@
 package tetris
 
-import "github.com/gdamore/tcell/v2"
+import (
+	"slices"
+
+	"github.com/gdamore/tcell/v2"
+)
 
 const (
 	BoardWidth   = 10 // Standard Tetris board width
@@ -70,14 +74,7 @@ func (r Row) CellFilled(col int) bool {
 func (b *Board) ClearLines() int {
 	linesCleared := 0
 	for i := len(b.grid) - 1; i >= 0; i-- {
-		fullLine := true
-		for _, cell := range b.grid[i] {
-			if cell == 0 {
-				fullLine = false
-				break
-			}
-		}
-		if fullLine {
+		if !slices.Contains(b.grid[i], 0) {
 			linesCleared++
 			// remove line
 			b.grid = append(b.grid[:i], b.grid[i+1:]...)

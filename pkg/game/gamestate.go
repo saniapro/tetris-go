@@ -15,63 +15,18 @@ type GameState struct {
 	SelectCount int
 	Lines       int
 	Score       int
-	Level       Level
+	Level       tetris.Level
 	GameOver    bool
 	R           Renderer
 	Ticker      *time.Ticker
-	TetrisStat  *tetris.TetrisStat
+	TetrisRate  *tetris.TetrisRate
 	Generator   *tetris.BagGenerator
 }
 
-// Level represents the current game level with manual override capability.
-type Level struct {
-	Number       int
-	ManualNumber bool
-}
-
-// TetrisStat tracks tetromino spawn statistics for gameplay analysis.
-type TetrisStat struct {
+// TetrisRate tracks tetromino spawn statistics for gameplay analysis.
+type TetrisRate struct {
 	Total  int
 	Tetris int
-}
-
-// Set updates the level number and marks whether it was manually set.
-// Returns true if the level changed, false otherwise.
-// If the level is already manually set and a non-manual update is attempted, it returns false.
-// Minimum level is 1.
-func (l *Level) Set(n int, manual bool) bool {
-	if l.ManualNumber && !manual {
-		return false
-	}
-	if n < 1 {
-		n = 1
-	}
-	if l.Number != n {
-		l.Number = n
-		l.ManualNumber = manual
-		return true
-	}
-	return false
-}
-
-// Get returns the current level number.
-func (l *Level) Get() int {
-	return l.Number
-}
-
-// IncreaseLevel increments the level by 1 and marks it as manually set.
-// Returns true if the level successfully increased.
-func (gs *GameState) IncreaseLevel() bool {
-	return gs.Level.Set(gs.Level.Number+1, true)
-}
-
-// DecreaseLevel decrements the level by 1 (minimum 1) and marks it as manually set.
-// Returns true if the level successfully decreased, false if already at minimum.
-func (gs *GameState) DecreaseLevel() bool {
-	if gs.Level.Number > 1 {
-		return gs.Level.Set(gs.Level.Number-1, true)
-	}
-	return false
 }
 
 const msPerLevel = 10
@@ -96,7 +51,7 @@ func (gs *GameState) MovePiece(dx, dy int) {
 		// revert move
 		gs.Current.X -= dx
 		gs.Current.Y -= dy
-		if fit == fitFloor {
+		if dy > 0 && fit == fitFloor {
 			gs.LockPiece()
 		}
 	}
@@ -142,16 +97,16 @@ func (gs *GameState) LockPiece() {
 	if gs.IsGameOver() {
 		gs.GameOver = true
 	}
-	gs.Next = tetris.SpawnPiece(gs.TetrisStat, gs.Generator.Next())
+	gs.Next = tetris.SpawnPiece(gs.Generator.Next())
 }
 
 // HardDrop instantly drops the current piece to the bottom of the board and locks it.
 // Continuously moves the piece down and redraws until it can no longer move.
 func (gs *GameState) HardDrop() {
 	for {
-		prevY := gs.Current.Y
-		gs.MovePiece(0, 1)
-		if gs.Current.Y == prevY || (prevY > 0 && gs.Current.Y == 0) {
+		gs.Current.Y++
+		if gs.Fit() != fitPossible {
+			gs.Current.Y--
 			break
 		}
 		gs.DrawBoard()
@@ -161,11 +116,69 @@ func (gs *GameState) HardDrop() {
 // RotatePiece rotates the current piece 90 degrees clockwise.
 // If rotation would cause a collision, reverts to the original orientation.
 func (gs *GameState) RotatePiece() {
-	tPiece := gs.Current
-	gs.Current = tetris.RotatePiece(gs.Current)
-	if gs.Fit() != fitPossible {
-		gs.Current = tPiece
+	// Implement SRS-style rotation (clockwise). Uses simple JLSTZ and I kick tables.
+	p := gs.Current
+	// O piece does not change orientation in SRS
+	if p.ID == 1 {
+		return
 	}
+
+	origX, origY := p.X, p.Y
+	origMatrix := p.Matrix
+	origRotation := p.Rotation
+
+	// rotated matrix (clockwise)
+	rotated := rotateCW(p.Matrix)
+
+	// SRS kick tests (dx, dy). dy values here follow standard SRS convention
+	// where positive dy is upwards; board Y increases downward, so we'll
+	// subtract dy when applying to piece Y.
+	var tests [][2]int
+	if p.ID == 0 { // I piece
+		tests = [][2]int{{0, 0}, {-2, 0}, {1, 0}, {-2, -1}, {1, 2}}
+	} else { // J, L, S, T, Z
+		tests = [][2]int{{0, 0}, {-1, 0}, {-1, 1}, {0, -2}, {-1, -2}}
+	}
+
+	for _, t := range tests {
+		dx, dy := t[0], t[1]
+		tryX := origX + dx
+		tryY := origY - dy
+
+		gs.Current.Matrix = rotated
+		gs.Current.X = tryX
+		gs.Current.Y = tryY
+
+		if gs.Fit() == fitPossible {
+			gs.Current.Rotation = (origRotation + 1) % 4
+			return
+		}
+	}
+
+	// no valid kick found — revert
+	gs.Current.Matrix = origMatrix
+	gs.Current.X = origX
+	gs.Current.Y = origY
+	gs.Current.Rotation = origRotation
+}
+
+// rotateCW returns a new matrix representing the given matrix rotated 90 degrees clockwise.
+func rotateCW(m [][]int) [][]int {
+	n := len(m)
+	if n == 0 {
+		return [][]int{}
+	}
+	r := len(m[0])
+	newM := make([][]int, r)
+	for i := range newM {
+		newM[i] = make([]int, n)
+	}
+	for i := range n {
+		for j := range r {
+			newM[j][n-1-i] = m[i][j]
+		}
+	}
+	return newM
 }
 
 // ClearScreen clears the entire terminal display.
@@ -175,35 +188,47 @@ func (gs *GameState) ClearScreen() {
 	}
 }
 
+// IncreaseLevel increments the level by 1 and marks it as manually set.
+// Returns true if the level successfully increased.
+func (gs *GameState) IncreaseLevel() bool {
+	return gs.Level.Set(gs.Level.Number+1, true)
+}
+
+// DecreaseLevel decrements the level by 1 (minimum 1) and marks it as manually set.
+// Returns true if the level successfully decreased, false if already at minimum.
+func (gs *GameState) DecreaseLevel() bool {
+	if gs.Level.Number > 1 {
+		return gs.Level.Set(gs.Level.Number-1, true)
+	}
+	return false
+}
+
 // UpdateScore increments the score based on the number of lines cleared.
-// Scoring: 1 line = 100 pts, 2 lines = 300 pts, 3 lines = 500 pts, 4 lines = 800 pts.
+// Scoring follows standard Tetris rules, scaled by the current level.
 func (gs *GameState) UpdateScore(lines int) {
 	// tetris scrore calculation
+	multiplier := gs.Level.Number
+	if gs.Level.Number > 10 {
+		multiplier++
+	}
 	switch lines {
 	case 1:
-		gs.Score += 100
+		gs.Score += 40 * multiplier
 	case 2:
-		gs.Score += 300
+		gs.Score += 100 * multiplier
 	case 3:
-		gs.Score += 500
+		gs.Score += 300 * multiplier
 	case 4:
-		gs.Score += 800
+		gs.Score += 1200 * multiplier
 	}
 }
 
 // UpdateLevel automatically increases the level based on score, unless manually overridden.
-// Level increases by 1 for every 500 points scored.
+// Level increases by 1 for every 10 lines cleared.
 // Returns true if the level changed, false otherwise.
 func (gs *GameState) UpdateLevel() bool {
-	if gs.Level.ManualNumber {
-		return false
-	}
-	newLevel := gs.Score/500 + 1
-	if newLevel != gs.Level.Number {
-		gs.Level.Number = newLevel
-		return true
-	}
-	return false
+	newLevel := gs.Lines/10 + 1
+	return gs.Level.Set(newLevel, false)
 }
 
 // IsGameOver checks if the game has ended by testing if the top row is blocked.

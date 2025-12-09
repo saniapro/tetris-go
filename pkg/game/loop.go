@@ -38,7 +38,7 @@ func Loop(gs *GameState) {
 			gs.MovePiece(0, 1)
 			lines := gs.ClearLines()
 			if lines > 0 {
-				gs.TetrisStat.AddTetraLines(lines)
+				gs.TetrisRate.AddTetraLines(lines)
 				gs.UpdateScore(lines)
 				if gs.UpdateLevel() {
 					// adjust tick speed based on level

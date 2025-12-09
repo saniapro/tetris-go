@@ -1,6 +1,10 @@
 package game
 
-import "github.com/saniapro/tetris/pkg/tetris"
+import (
+	"time"
+
+	"github.com/saniapro/tetris/pkg/tetris"
+)
 
 // Init initializes a new GameState with a fresh board, spawns initial pieces,
 // and sets up the renderer and tetromino bag generator.
@@ -9,13 +13,13 @@ func Init() *GameState {
 	gs := &GameState{
 		Board:      tetris.NewBoard(),
 		R:          &ScreenRenderer{},
-		Level:      Level{Number: 1, ManualNumber: false},
-		TetrisStat: &tetris.TetrisStat{},
-		Generator:  tetris.NewBagGenerator(0),
+		Level:      tetris.Level{Number: 1},
+		TetrisRate: &tetris.TetrisRate{},
+		Generator:  tetris.NewBagGenerator(time.Now().UnixNano()),
 	}
 
-	gs.Current = tetris.SpawnPiece(gs.TetrisStat, gs.Generator.Next())
-	gs.Next = tetris.SpawnPiece(gs.TetrisStat, gs.Generator.Next())
+	gs.Current = tetris.SpawnPiece(gs.Generator.Next())
+	gs.Next = tetris.SpawnPiece(gs.Generator.Next())
 
 	return gs
 }
