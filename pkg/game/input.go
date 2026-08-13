@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/saniapro/tetris/pkg/tetris"
 )
 
 // HandleInput processes keyboard events and translates them to game actions.
@@ -37,6 +38,18 @@ func HandleInput(gs *GameState, ev tcell.Event) {
 				if gs.IncreaseLevel() {
 					gs.SetTickerInterval(gs.Level.Number)
 				}
+			case '4':
+				gs.Generator = tetris.NewFourteenBagGenerator(42)
+				gs.EventName = "switch to 14-bag"
+			case '7':
+				gs.Generator = tetris.NewBagGenerator(42)
+				gs.EventName = "switch to 7-bag"
+			case 'c':
+				gs.Generator = tetris.NewClassicNexter(42)
+				gs.EventName = "switch to classic NES"
+			case 'r':
+				gs.Generator = tetris.NewV2Nexter(42)
+				gs.EventName = "switch to random v2"
 			}
 		}
 	}

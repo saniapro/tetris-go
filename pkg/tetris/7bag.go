@@ -13,7 +13,7 @@ type BagGenerator struct {
 
 // NewBagGenerator creates a new 7-bag generator with the given seed.
 // Immediately generates and shuffles the first bag.
-func NewBagGenerator(seed int64) *BagGenerator {
+func NewBagGenerator(seed int64) Nexter {
 	// Use PCG source from math/rand/v2 for a good seeded generator.
 	s := uint64(seed)
 	src := rand.NewPCG(s, s^0x9e3779b97f4a7c15)
@@ -36,6 +36,52 @@ func (g *BagGenerator) refill() {
 // Next returns the next piece index from the current bag.
 // Automatically refills the bag when exhausted.
 func (g *BagGenerator) Next() int {
+	if g.i >= len(g.bag) {
+		g.refill()
+	}
+	p := g.bag[g.i]
+	g.i++
+	return p
+}
+
+// FourteenBagGenerator implements the 14-bag random tetromino selection algorithm.
+// Ensures each of the 7 tetrominoes appears exactly twice per bag before reshuffling.
+// This reduces the frequency of droughts compared to the standard 7-bag.
+type FourteenBagGenerator struct {
+	bag []int      // Current bag of piece indices
+	i   int        // Current position in bag
+	rng *rand.Rand // Random number generator
+}
+
+// NewFourteenBagGenerator creates a new 14-bag generator with the given seed.
+// Immediately generates and shuffles the first bag.
+func NewFourteenBagGenerator(seed int64) Nexter {
+	// Use PCG source from math/rand/v2 for a good seeded generator.
+	s := uint64(seed)
+	src := rand.NewPCG(s, s^0x9e3779b97f4a7c15)
+	g := &FourteenBagGenerator{
+		rng: rand.New(src),
+	}
+	g.refill()
+	return g
+}
+
+// refill generates a new shuffled bag containing all 7 piece types (0-6) twice.
+func (g *FourteenBagGenerator) refill() {
+	g.bag = make([]int, 14)
+	for i := range 7 {
+		g.bag[i] = i
+		g.bag[i+7] = i
+	}
+	g.rng.Shuffle(len(g.bag), func(i, j int) {
+		g.bag[i], g.bag[j] = g.bag[j], g.bag[i]
+	})
+	g.i = 0
+}
+
+// Next returns the next piece index from the current bag.
+// Automatically refills the bag when exhausted.
+func (g *FourteenBagGenerator) Next() int {
 	if g.i >= len(g.bag) {
 		g.refill()
 	}

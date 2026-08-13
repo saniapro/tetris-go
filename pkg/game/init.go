@@ -15,7 +15,7 @@ func Init() *GameState {
 		R:          &ScreenRenderer{},
 		Level:      tetris.Level{Number: 1},
 		TetrisRate: &tetris.TetrisRate{},
-		Generator:  tetris.NewBagGenerator(time.Now().UnixNano()),
+		Generator:  tetris.NewClassicNexter(time.Now().UnixNano()),
 	}
 
 	gs.Current = tetris.SpawnPiece(gs.Generator.Next())

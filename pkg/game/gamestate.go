@@ -20,7 +20,7 @@ type GameState struct {
 	R           Renderer
 	Ticker      *time.Ticker
 	TetrisRate  *tetris.TetrisRate
-	Generator   *tetris.BagGenerator
+	Generator   tetris.Nexter
 }
 
 // TetrisRate tracks tetromino spawn statistics for gameplay analysis.
